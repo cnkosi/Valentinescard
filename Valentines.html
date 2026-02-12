@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Gcinile 💕</title>
+
+<style>
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #ff6a88, #ff99ac);
+  font-family: 'Segoe UI', sans-serif;
+  overflow: hidden;
+}
+
+/* Floating hearts */
+.heart {
+  position: absolute;
+  animation: float 6s linear infinite;
+}
+
+@keyframes float {
+  from { transform: translateY(100vh); opacity: 1; }
+  to { transform: translateY(-10vh); opacity: 0; }
+}
+
+/* Envelope */
+.envelope {
+  width: 320px;
+  height: 200px;
+  background: #ff4d6d;
+  position: relative;
+  cursor: pointer;
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  transition: transform 1s ease;
+}
+
+.flap {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 160px solid transparent;
+  border-right: 160px solid transparent;
+  border-bottom: 100px solid #ff3355;
+  top: -100px;
+  transform-origin: bottom;
+  transition: transform 1s ease;
+}
+
+/* Card Container */
+.card-container {
+  position: absolute;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Card */
+.card {
+  background: white;
+  padding: 45px;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  text-align: center;
+  width: 440px;
+}
+
+.card h1 {
+  color: #ff4d6d;
+  margin-bottom: 10px;
+}
+
+.typing {
+  min-height: 30px;
+  margin: 15px 0;
+  font-size: 16px;
+}
+
+.countdown {
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #ff4d6d;
+}
+
+.buttons {
+  position: relative;
+  height: 80px;
+}
+
+button {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  position: absolute;
+  transition: 0.3s;
+}
+
+#yesBtn {
+  background: #ff4d6d;
+  color: white;
+  left: 60px;
+}
+
+#yesBtn:hover {
+  transform: scale(1.1);
+}
+
+#noBtn {
+  background: #ddd;
+  right: 60px;
+}
+
+.message {
+  margin-top: 20px;
+  font-size: 20px;
+  color: #ff4d6d;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Envelope -->
+<div class="envelope" id="envelope">
+  <div class="flap" id="flap"></div>
+</div>
+
+<!-- Card -->
+<div class="card-container" id="cardContainer">
+  <div class="card">
+    <h1>Gcinile 💕</h1>
+    <div class="typing" id="typing"></div>
+    <div class="countdown" id="countdown"></div>
+    <h2>Will you be my Valentine? 💖</h2>
+
+    <div class="buttons">
+      <button id="yesBtn">Yes 😍</button>
+      <button id="noBtn">No 🙈</button>
+    </div>
+
+    <div class="message" id="message"></div>
+  </div>
+</div>
+
+<!-- Romantic Piano Music -->
+<audio id="bgMusic" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-110624.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const envelope = document.getElementById("envelope");
+const flap = document.getElementById("flap");
+const cardContainer = document.getElementById("cardContainer");
+const music = document.getElementById("bgMusic");
+
+// Envelope open animation
+envelope.addEventListener("click", () => {
+  flap.style.transform = "rotateX(180deg)";
+  envelope.style.transform = "scale(0)";
+
+  setTimeout(() => {
+    envelope.style.display = "none";
+    cardContainer.style.display = "flex";
+    startTyping();
+    startCountdown();
+
+    // Fade in music
+    music.volume = 0;
+    music.play();
+    let fadeIn = setInterval(() => {
+      if (music.volume < 0.8) {
+        music.volume += 0.05;
+      } else {
+        clearInterval(fadeIn);
+      }
+    }, 200);
+
+  }, 1000);
+});
+
+// Typing animation
+const text = "From the moment I met you, you became my favorite notification 💌";
+let index = 0;
+function startTyping() {
+  function typeEffect() {
+    if (index < text.length) {
+      document.getElementById("typing").innerHTML += text.charAt(index);
+      index++;
+      setTimeout(typeEffect, 40);
+    }
+  }
+  typeEffect();
+}
+
+// Countdown
+function startCountdown() {
+  function updateCountdown() {
+    const now = new Date();
+    let year = now.getFullYear();
+    let valentines = new Date(year, 1, 14);
+    if (now > valentines) valentines = new Date(year + 1, 1, 14);
+
+    const diff = valentines - now;
+    const d = Math.floor(diff / (1000*60*60*24));
+    const h = Math.floor((diff/(1000*60*60))%24);
+    const m = Math.floor((diff/(1000*60))%60);
+    const s = Math.floor((diff/1000)%60);
+
+    document.getElementById("countdown").innerHTML =
+      `⏳ ${d}d ${h}h ${m}m ${s}s until Valentine’s Day`;
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+}
+
+// No button runs away
+const noBtn = document.getElementById("noBtn");
+noBtn.addEventListener("mouseover", () => {
+  const x = Math.random()*250 -125;
+  const y = Math.random()*150 -75;
+  noBtn.style.transform = `translate(${x}px,${y}px)`;
+});
+
+// Yes button
+document.getElementById("yesBtn").addEventListener("click", () => {
+  document.getElementById("message").innerHTML =
+    "Yayyy Gcinile!! 💕 I can't wait to spoil you 😘";
+
+  startConfetti();
+
+  // Fade out music
+  let fadeOut = setInterval(() => {
+    if (music.volume > 0.05) {
+      music.volume -= 0.05;
+    } else {
+      clearInterval(fadeOut);
+      music.pause();
+      music.currentTime = 0;
+    }
+  }, 200);
+});
+
+// Floating hearts
+function createHeart() {
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.innerHTML = "💖";
+  heart.style.left = Math.random()*100+"vw";
+  heart.style.fontSize = Math.random()*20+15+"px";
+  document.body.appendChild(heart);
+  setTimeout(()=>heart.remove(),6000);
+}
+setInterval(createHeart,500);
+
+// Confetti
+function startConfetti(){
+  for(let i=0;i<120;i++){
+    const c=document.createElement("div");
+    c.style.position="absolute";
+    c.style.width="8px";
+    c.style.height="8px";
+    c.style.background=`hsl(${Math.random()*360},100%,50%)`;
+    c.style.top="50%";
+    c.style.left="50%";
+    c.style.borderRadius="50%";
+    document.body.appendChild(c);
+    const x=(Math.random()-0.5)*700;
+    const y=(Math.random()-0.5)*700;
+    c.animate([
+      {transform:"translate(0,0)",opacity:1},
+      {transform:`translate(${x}px,${y}px)`,opacity:0}
+    ],{duration:1800,easing:"ease-out"});
+    setTimeout(()=>c.remove(),1800);
+  }
+}
+</script>
+
+</body>
+</html>
