@@ -19,13 +19,37 @@ body {
 
 /* Floating hearts */
 .heart { position: absolute; animation: float 6s linear infinite; }
-@keyframes float { from { transform: translateY(100vh); opacity: 1; } to { transform: translateY(-10vh); opacity: 0; } }
+@keyframes float {
+  from { transform: translateY(100vh); opacity: 1; }
+  to { transform: translateY(-10vh); opacity: 0; }
+}
+
+/* Envelope Container */
+.envelope-wrapper {
+  text-align: center;
+  cursor: pointer;
+}
+
+/* Click text */
+.open-text {
+  color: white;
+  font-size: 18px;
+  margin-bottom: 15px;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 /* Envelope */
 .envelope {
-  width: 300px; height: 180px;
+  width: 320px;
+  height: 200px;
   background: #ff4d6d;
-  position: relative; cursor: pointer;
+  position: relative;
   border-radius: 10px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.3);
   transition: transform 1s ease;
@@ -33,15 +57,22 @@ body {
 .flap {
   position: absolute;
   width: 0; height: 0;
-  border-left: 150px solid transparent;
-  border-right: 150px solid transparent;
-  border-bottom: 90px solid #ff3355;
-  top: -90px; transform-origin: bottom;
+  border-left: 160px solid transparent;
+  border-right: 160px solid transparent;
+  border-bottom: 100px solid #ff3355;
+  top: -100px;
+  transform-origin: bottom;
   transition: transform 1s ease;
 }
 
 /* Card */
-.card-container { position: absolute; display: none; justify-content: center; align-items: center; padding: 20px; }
+.card-container {
+  position: absolute;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
 .card {
   background: white;
   padding: 35px;
@@ -55,7 +86,8 @@ body {
 .card h1 { color: #ff4d6d; }
 .typing { min-height: 30px; margin: 10px 0; }
 .countdown { font-weight: bold; margin-bottom: 15px; color: #ff4d6d; }
-.buttons { position: relative; height: 100px; }
+
+.buttons { position: relative; height: 120px; }
 
 button {
   padding: 12px 24px;
@@ -64,20 +96,36 @@ button {
   font-size: 16px;
   cursor: pointer;
   position: absolute;
-  transition: 0.2s;
+  transition: 0.3s;
 }
-#yesBtn { background: #ff4d6d; color: white; left: 15%; }
-#yesBtn.glow { box-shadow: 0 0 20px 8px #ff4d6d; transform: scale(1.1); transition: 0.3s; }
+
+#yesBtn {
+  background: #ff4d6d;
+  color: white;
+  left: 15%;
+  transform: scale(1);
+}
+
+#yesBtn.glow { box-shadow: 0 0 25px 10px #ff4d6d; }
+
 #noBtn { background: #ddd; right: 15%; }
 
-.message { margin-top: 20px; font-size: 18px; color: #ff4d6d; font-weight: bold; }
+.message {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #ff4d6d;
+  font-weight: bold;
+}
 </style>
 </head>
 
 <body>
 
-<div class="envelope" id="envelope">
-  <div class="flap" id="flap"></div>
+<div class="envelope-wrapper" id="envelopeWrapper">
+  <div class="open-text">💌 Click to open me...</div>
+  <div class="envelope" id="envelope">
+    <div class="flap" id="flap"></div>
+  </div>
 </div>
 
 <div class="card-container" id="cardContainer">
@@ -96,18 +144,20 @@ button {
   </div>
 </div>
 
-<!-- Background music -->
 <audio id="bgMusic" loop>
   <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=romantic-piano-110624.mp3" type="audio/mpeg">
 </audio>
 
-<!-- Wrong answer sound -->
 <audio id="wrongSound">
   <source src="https://www.soundjay.com/button/sounds/button-10.mp3" type="audio/mpeg">
 </audio>
 
+<audio id="clapSound">
+  <source src="https://www.soundjay.com/human/sounds/applause-8.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-const envelope = document.getElementById("envelope");
+const wrapper = document.getElementById("envelopeWrapper");
 const flap = document.getElementById("flap");
 const cardContainer = document.getElementById("cardContainer");
 const music = document.getElementById("bgMusic");
@@ -115,26 +165,20 @@ const noBtn = document.getElementById("noBtn");
 const yesBtn = document.getElementById("yesBtn");
 const buttonArea = document.getElementById("buttonArea");
 const wrongSound = document.getElementById("wrongSound");
+const clapSound = document.getElementById("clapSound");
 
-/* Envelope open */
-envelope.addEventListener("click", () => {
+let yesScale = 1;
+
+wrapper.addEventListener("click", () => {
   flap.style.transform = "rotateX(180deg)";
-  envelope.style.transform = "scale(0)";
+  wrapper.style.transform = "scale(0)";
 
   setTimeout(() => {
-    envelope.style.display = "none";
+    wrapper.style.display = "none";
     cardContainer.style.display = "flex";
     startTyping();
     startCountdown();
-
-    // Play music (mobile safe)
-    music.volume = 0;
-    music.play().then(() => {
-      let fadeIn = setInterval(() => {
-        if (music.volume < 0.8) music.volume += 0.05;
-        else clearInterval(fadeIn);
-      }, 200);
-    }).catch(() => {});
+    music.play().catch(()=>{});
   }, 1000);
 });
 
@@ -164,31 +208,29 @@ function startCountdown() {
     const h = Math.floor((diff/(1000*60*60))%24);
     const m = Math.floor((diff/(1000*60))%60);
     const s = Math.floor((diff/1000)%60);
-    document.getElementById("countdown").innerHTML = `⏳ ${d}d ${h}h ${m}m ${s}s until Valentine’s Day`;
+    document.getElementById("countdown").innerHTML =
+      `⏳ ${d}d ${h}h ${m}m ${s}s until Valentine’s Day`;
   }
   updateCountdown();
   setInterval(updateCountdown, 1000);
 }
 
-/* Move NO button and trigger effects */
+/* Move NO */
 function moveNoButton() {
   const areaRect = buttonArea.getBoundingClientRect();
   const btnRect = noBtn.getBoundingClientRect();
   const maxX = areaRect.width - btnRect.width;
   const maxY = areaRect.height - btnRect.height;
-  const newX = Math.random() * maxX;
-  const newY = Math.random() * maxY;
-  noBtn.style.left = newX + "px";
-  noBtn.style.top = newY + "px";
+  noBtn.style.left = Math.random() * maxX + "px";
+  noBtn.style.top = Math.random() * maxY + "px";
 
-  // Glow YES button
+  yesScale += 0.15;
+  yesBtn.style.transform = `scale(${yesScale})`;
   yesBtn.classList.add("glow");
-  setTimeout(()=>yesBtn.classList.remove("glow"),800);
+  setTimeout(()=>yesBtn.classList.remove("glow"),500);
 
-  // Vibrate phone
   if (navigator.vibrate) navigator.vibrate(150);
 
-  // Play wrong answer sound
   wrongSound.currentTime = 0;
   wrongSound.play().catch(()=>{});
 }
@@ -196,25 +238,27 @@ function moveNoButton() {
 noBtn.addEventListener("mouseover", moveNoButton);
 noBtn.addEventListener("touchstart", moveNoButton);
 
-/* Yes button */
+/* YES */
 yesBtn.addEventListener("click", () => {
-  document.getElementById("message").innerHTML = "Yayyy Gcinile!! 💕 I can't wait to spoil you 😘";
+  document.getElementById("message").innerHTML =
+    "Great choice, my love 💕 I knew your heart would choose mine. Forever starts now.";
+
+  clapSound.play().catch(()=>{});
   startConfetti();
 
-  // Fade out music
-  let fadeOut = setInterval(() => {
-    if (music.volume > 0.05) music.volume -= 0.05;
-    else { clearInterval(fadeOut); music.pause(); music.currentTime=0; }
+  let fade = setInterval(()=>{
+    if(music.volume>0.05) music.volume-=0.05;
+    else { clearInterval(fade); music.pause(); }
   },200);
 });
 
 /* Hearts */
-function createHeart() {
-  const heart = document.createElement("div");
-  heart.className = "heart";
-  heart.innerHTML = "💖";
-  heart.style.left = Math.random()*100+"vw";
-  heart.style.fontSize = Math.random()*20+15+"px";
+function createHeart(){
+  const heart=document.createElement("div");
+  heart.className="heart";
+  heart.innerHTML="💖";
+  heart.style.left=Math.random()*100+"vw";
+  heart.style.fontSize=Math.random()*20+15+"px";
   document.body.appendChild(heart);
   setTimeout(()=>heart.remove(),6000);
 }
@@ -234,7 +278,11 @@ function startConfetti(){
     document.body.appendChild(c);
     const x=(Math.random()-0.5)*600;
     const y=(Math.random()-0.5)*600;
-    c.animate([{transform:"translate(0,0)",opacity:1},{transform:`translate(${x}px,${y}px)`,opacity:0}],{duration:1500,easing:"ease-out"});
+    c.animate(
+      [{transform:"translate(0,0)",opacity:1},
+       {transform:`translate(${x}px,${y}px)`,opacity:0}],
+      {duration:1500,easing:"ease-out"}
+    );
     setTimeout(()=>c.remove(),1500);
   }
 }
